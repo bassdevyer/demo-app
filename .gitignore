@@ -11,6 +11,9 @@
 # production
 /build
 
+# WebStorm files
+/.idea
+
 # misc
 .DS_Store
 .env.local
