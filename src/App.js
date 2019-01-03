@@ -6,64 +6,48 @@ class App extends Component {
   render = () => (
     <Router>
       <div>
+        <h2>Accounts</h2>
         <ul>
           <li>
-            <Link to='/'>Home</Link>
+            <Link to='/netlix'>Netflix</Link>
           </li>
           <li>
-            <Link to='/about'>About</Link>
+            <Link to='/zillow-group'>Zillow Group</Link>
           </li>
           <li>
-            <Link to='/topics'>Topics</Link>
+            <Link to='/yahoo'>Yahoo</Link>
+          </li>
+          <li>
+            <Link to='/modus-create'>Modus Create</Link>
           </li>
         </ul>
 
-        <hr/>
+        <Route path='/:id' component={Child}/>
 
-        <Route exact path='/' component={Home}/>
-        <Route path='/about' component={About}/>
-        <Route path='/topics' component={Topics}/>
+        {/*
+        It's possible to use regular expressions to control what param values 
+        should be matched.
+          * "/order/asc"  - matched
+          * "/order/desc" - matched
+          * "/order/foo"  - not matched
+        */}
+        <Route
+          path='/order/:direction(asc|desc)'
+          component={ComponentWithRegex}
+        />
       </div>
     </Router>
   )
 }
 
-const Home = () =>
+const Child = ({match}) =>
   <div>
-    <h2>Home</h2>
+    <h3>ID: {match.params.id}</h3>
   </div>
 
-const About = () =>
+const ComponentWithRegex = ({match}) =>
   <div>
-    <h2>About</h2>
-  </div>
-
-const Topics = ({match}) =>
-  <div>
-    <h2>Topics</h2>
-    <ul>
-      <li>
-        <Link to={`${match.url}/rendering`}>Rendering with React</Link>
-      </li>
-      <li>
-        <Link to={`${match.url}/components`}>Components</Link>
-      </li>
-      <li>
-        <Link to={`${match.url}/props-v-state`}>Props v. State</Link>
-      </li>
-    </ul>
-
-    <Route path={`${match.path}/:topicId`} component={Topic}/>
-    <Route
-      exact
-      path={match.path}
-      render={() => <h3>Please select a topic</h3>}
-    />
-  </div>
-
-const Topic = ({match}) =>
-  <div>
-    <h3>{match.params.topicId}</h3>
+    <h3>Only asc/desc are allowed: {match.params.direction}</h3>
   </div>
 
 export default App
