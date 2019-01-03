@@ -2,19 +2,25 @@ import React, { Component } from 'react'
 import './App.css'
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
 
-/**
- * This example shows how nested routing works. The route /topics loads the 
- * Topics component, which renders any further <Route>'s conditionally on the 
- * paths :id value.import 
- */
-
 class App extends Component {
   render = () => (
     <Router>
       <div>
-        <Header/>
+        <ul>
+          <li>
+            <Link to='/'>Home</Link>
+          </li>
+          <li>
+            <Link to='/about'>About</Link>
+          </li>
+          <li>
+            <Link to='/topics'>Topics</Link>
+          </li>
+        </ul>
 
-        <Route path='/' exact component={Home}/>
+        <hr/>
+
+        <Route exact path='/' component={Home}/>
         <Route path='/about' component={About}/>
         <Route path='/topics' component={Topics}/>
       </div>
@@ -22,14 +28,23 @@ class App extends Component {
   )
 }
 
-const Home = () => <h2>Home</h2>
-const About = () => <h2>About</h2>
-const Topic = ({match}) => <h3>Requested param: {match.params.id}</h3>
+const Home = () =>
+  <div>
+    <h2>Home</h2>
+  </div>
 
-const Topics = ({match}) => (
+const About = () =>
+  <div>
+    <h2>About</h2>
+  </div>
+
+const Topics = ({match}) =>
   <div>
     <h2>Topics</h2>
     <ul>
+      <li>
+        <Link to={`${match.url}/rendering`}>Rendering with React</Link>
+      </li>
       <li>
         <Link to={`${match.url}/components`}>Components</Link>
       </li>
@@ -38,25 +53,18 @@ const Topics = ({match}) => (
       </li>
     </ul>
 
-    <Route path={`${match.path}/:id`} component={Topic}/>
-    <Route exact path={`${match.path}`}
-           render={() => <h3>Please select a topic.</h3>}/>
+    <Route path={`${match.path}/:topicId`} component={Topic}/>
+    <Route
+      exact
+      path={match.path}
+      render={() => <h3>Please select a topic</h3>}
+    />
   </div>
-)
 
-const Header = () => (
-  <ul>
-    <li>
-      <Link to='/'>Home</Link>
-    </li>
-    <li>
-      <Link to='/about'>About</Link>
-    </li>
-    <li>
-      <Link to='/topics'>Topics</Link>
-    </li>
-  </ul>
-)
+const Topic = ({match}) =>
+  <div>
+    <h3>{match.params.topicId}</h3>
+  </div>
 
 export default App
 
