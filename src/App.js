@@ -1,54 +1,117 @@
 import React, { Component } from 'react'
 import './App.css'
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
+import {
+  BrowserRouter as Router,
+  Link,
+  Redirect,
+  Route,
+  withRouter
+} from 'react-router-dom'
+
+////////////////////////////////////////////////////////////
+// 1. Click the public page
+// 2. Click the protected page
+// 3. Log in
+// 4. Click the back button, note the URL each time
 
 class App extends Component {
   render = () => (
     <Router>
       <div>
-        <h2>Accounts</h2>
+        <AuthButton/>
         <ul>
           <li>
-            <Link to='/netlix'>Netflix</Link>
+            <Link to='/public'>Public Page</Link>
           </li>
           <li>
-            <Link to='/zillow-group'>Zillow Group</Link>
-          </li>
-          <li>
-            <Link to='/yahoo'>Yahoo</Link>
-          </li>
-          <li>
-            <Link to='/modus-create'>Modus Create</Link>
+            <Link to='/protected'>Protected Page</Link>
           </li>
         </ul>
 
-        <Route path='/:id' component={Child}/>
-
-        {/*
-        It's possible to use regular expressions to control what param values 
-        should be matched.
-          * "/order/asc"  - matched
-          * "/order/desc" - matched
-          * "/order/foo"  - not matched
-        */}
-        <Route
-          path='/order/:direction(asc|desc)'
-          component={ComponentWithRegex}
-        />
+        <Route path='/public' component={Public}/>
+        <Route path='/login' component={Login}/>
+        <PrivateRoute path='/protected' component={Protected}/>
       </div>
     </Router>
   )
 }
 
-const Child = ({match}) =>
-  <div>
-    <h3>ID: {match.params.id}</h3>
-  </div>
+const fakeAuth = {
+  isAuthenticated: false,
+  authenticate (cb) {
+    this.isAuthenticated = true
+    setTimeout(cb, 100) // fake async
+  },
+  signOut (cb) {
+    this.isAuthenticated = false
+    setTimeout(cb, 100)
+  }
+}
 
-const ComponentWithRegex = ({match}) =>
-  <div>
-    <h3>Only asc/desc are allowed: {match.params.direction}</h3>
-  </div>
+const AuthButton = withRouter(
+  ({history}) =>
+    fakeAuth.isAuthenticated ? (
+      <p>
+        Welcome!{' '}
+        <button
+          onClick={() => {
+            fakeAuth.signOut(() => history.push('/'))
+          }}
+        >
+          Sign out
+        </button>
+      </p>
+    ) : (
+      <p>You are not logged in.</p>
+    )
+)
+
+const PrivateRoute = ({component: Component, ...rest}) =>
+  <Route
+    {...rest}
+    render={props =>
+      fakeAuth.isAuthenticated ? (
+        <Component {...props} />
+      ) : (
+        <Redirect
+          to={{
+            pathname: '/login',
+            state: {from: props.location}
+          }}
+        />
+      )
+    }
+  />
+
+const Public = () =>
+  <h3>Public</h3>
+
+const Protected = () =>
+  <h3>Protected</h3>
+
+class Login extends Component {
+  state = {redirectToReferrer: false}
+
+  login = () => {
+    fakeAuth.authenticate(() => {
+      this.setState({redirectToReferrer: true})
+    })
+  }
+
+  render () {
+    let {from} = this.props.location.state || {from: {pathname: '/'}}
+    let {redirectToReferrer} = this.state
+    if (redirectToReferrer) return <Redirect to={from}/>
+
+    return (
+      <div>
+        <p>You must log in to view the page at {from.pathname}</p>
+        <button onClick={this.login}>Log in</button>
+      </div>
+    )
+
+  }
+}
 
 export default App
 
